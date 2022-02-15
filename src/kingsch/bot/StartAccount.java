@@ -248,38 +248,17 @@ public class StartAccount extends Thread {
     String name = "";
 
     private void getemail(WebDriver driver) {
-        Alls:
         while (true) {
-            driver.findElement(By.xpath("//*[@id=\"address\"]")).click();
-            driver.findElement(By.xpath("//*[@id=\"address\"]")).click();
-            String result = "";
-            Copying:
-            while (true) {
-                try {
-                    Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
-                    Transferable contents = clipboard.getContents(null);
-                    boolean hasStringText = (contents != null) && contents.isDataFlavorSupported(DataFlavor.stringFlavor);
-                    if (hasStringText) {
-                        try {
-                            result = (String) contents.getTransferData(DataFlavor.stringFlavor);
-                        } catch (UnsupportedFlavorException | IOException ex) {
-                            System.out.println(ex);
-                            ex.printStackTrace();
-                        }
-                    }
-                    if (!result.contains("..")) {
-                        email = result;
-                        break Alls;
-                    }
-                    continue Alls;
-                } catch (Exception e) {
-                    continue Copying;
+            try {
+                String result = driver.findElement(By.id("address")).getAttribute("value");
+                if (!result.contains("..")) {
+                    email = result;
+                    break;
                 }
-
+            } catch (Exception e) {
+                System.out.println(e);
             }
-
         }
-
     }
 
     private void getname(WebDriver driver) {
@@ -374,7 +353,7 @@ public class StartAccount extends Thread {
         }
     }
 
-    private void Emailwork(WebDriver driver) {
+    private void Emailwork() {
         try {
             OpenAndUpdateDriver("https://mail.tm/en/");
             getemail(driver);
@@ -388,7 +367,7 @@ public class StartAccount extends Thread {
 
     private void getphone(WebDriver driver) {
 
-        driver.findElement(By.xpath("//*[@class=\"layui-btn clickA\"]")).sendKeys(Keys.SPACE);
+        driver.findElement(By.xpath("//*[@class='layui-btn clickA']")).sendKeys(Keys.SPACE);
         while (true) {
 
             try {
@@ -426,7 +405,7 @@ public class StartAccount extends Thread {
     }
 
     private void Phonework(WebDriver driver) {
-        driver.navigate().to("https://mytempsms.com/receive-sms-online/malaysia-phone-number-1128652898.html");
+        driver.navigate().to("https://mytempsms.com/receive-sms-online/uk-phone-number-5020203597.html");
         getphone(driver);
     }
     private boolean done = false;
@@ -671,10 +650,9 @@ public class StartAccount extends Thread {
                 try {
                     KingschAccount.StatusLBL.setText("Setting...");
 
-                    // Phonework(driver);
                     KingschAccount.StatusLBL.setText("Goging to get email...");
-                    Emailwork(driver);
-
+                    Emailwork();
+                    //Phonework(driver);
                     KingschAccount.StatusLBL.setText("Goging to get random name...");
                     driver.navigate().to("http://random-name-generator.info/");
                     getname(driver);

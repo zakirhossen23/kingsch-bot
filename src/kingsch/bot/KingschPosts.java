@@ -216,6 +216,17 @@ public class KingschPosts extends javax.swing.JFrame {
     private void workonpost(WebDriver driver, String Comment) {
 
         try {
+
+            Thread.sleep(1000);
+            while (true) {
+                try {
+                    driver.findElement(By.xpath("//*[@class='CookiePopup__button']")).click(); //Click cookie Accept
+                    break;
+                } catch (Exception e) {
+                    Thread.sleep(500);
+                }
+            }
+
             Thread.sleep(1000);
             try {
                 driver.findElement(By.xpath("//*[@class='PostFooter__main-container']")).sendKeys(Keys.END); //end
@@ -234,11 +245,19 @@ public class KingschPosts extends javax.swing.JFrame {
                         driver.findElement(By.xpath("//*[@class='PostFooter__button-container']//*[@class='trigger']")).click(); //click share
                         Thread.sleep(1000);
                     } catch (Exception e) {
+                        try {
+                            driver.findElement(By.xpath("//*[@class='CookiePopup__button']")).click(); //Click cookie Accept
+                        } catch (Exception e3) {
+                        }
                     }
                     driver.findElement(By.xpath("//*[@aria-label='reshared']")).click(); //click Reshare
                     Thread.sleep(200);
                     break;
                 } catch (Exception e2) {
+                    try {
+                        driver.findElement(By.xpath("//*[@class='CookiePopup__button']")).click(); //Click cookie Accept
+                    } catch (Exception e) {
+                    }
                     System.out.println(e2.toString());
                 }
             }

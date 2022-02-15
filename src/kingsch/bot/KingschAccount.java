@@ -24,7 +24,6 @@ import java.util.regex.Pattern;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 
-
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.chrome.ChromeOptions;
@@ -32,11 +31,9 @@ import org.openqa.selenium.remote.DesiredCapabilities;
 
 import javax.swing.table.DefaultTableModel;
 
-
 /**
  * @author zakir
  */
-
 public class KingschAccount extends javax.swing.JFrame {
 
     /**
@@ -200,24 +197,22 @@ public class KingschAccount extends javax.swing.JFrame {
     ExecutorService exec;
     private boolean exit;
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        StatusLBL.setText( "starting...");
-        stopWork= false;
+        StatusLBL.setText("starting...");
+        stopWork = false;
 
-        StartAccount obj =  new   StartAccount();
+        StartAccount obj = new StartAccount();
         obj.start();
 
-
-            StatusLBL.setText( "Started...");
-
+        StatusLBL.setText("Started...");
 
 
     }//GEN-LAST:event_jButton1ActionPerformed
-    public static volatile boolean stopWork=false;
+    public static volatile boolean stopWork = false;
 
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        stopWork= true;
-        StatusLBL.setText( "stop");
+        stopWork = true;
+        StatusLBL.setText("stop");
 
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -244,7 +239,8 @@ public class KingschAccount extends javax.swing.JFrame {
     private void KillprocessActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_KillprocessActionPerformed
         try {
             Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");
-        } catch(Exception e){};
+        } catch (Exception e) {
+        };
     }//GEN-LAST:event_KillprocessActionPerformed
 
     /**
