@@ -216,26 +216,26 @@ public class KingschPosts extends javax.swing.JFrame {
     private void workonpost(WebDriver driver, String Comment) {
 
         try {
-            while (true) {
-                try {
-                    driver.findElement(By.xpath("//*[@class=\"PostFooter__main-container\"]")).sendKeys(Keys.END); //end
-                    break;
-                } catch (Exception e) {
-                }
-            }
+            Thread.sleep(1000);
             try {
-                driver.findElement(By.xpath("(//*[@aria-label=\"like\"])[1]")).click(); //like
+                driver.findElement(By.xpath("//*[@class='PostFooter__main-container']")).sendKeys(Keys.END); //end
+
+            } catch (Exception e) {
+            }
+            Thread.sleep(500);
+            try {
+                driver.findElement(By.xpath("//*[@aria-label='like']")).click(); //like
             } catch (Exception e) {
             }
 
             while (true) {
                 try {
                     try {
-                        driver.findElement(By.xpath("//*[@class=\"PostFooter__button-container\"]//*[@class=\"trigger\"]")).click(); //click share
+                        driver.findElement(By.xpath("//*[@class='PostFooter__button-container']//*[@class='trigger']")).click(); //click share
                         Thread.sleep(1000);
                     } catch (Exception e) {
                     }
-                    driver.findElement(By.xpath("//*[@aria-label=\"reshared\"]")).click(); //click Reshare
+                    driver.findElement(By.xpath("//*[@aria-label='reshared']")).click(); //click Reshare
                     Thread.sleep(200);
                     break;
                 } catch (Exception e2) {
@@ -287,8 +287,6 @@ public class KingschPosts extends javax.swing.JFrame {
     }
     public ChromeDriver driver;
 
-    
-    
     private static void unzip(Path source, Path target) throws IOException {
 
         try ( ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
@@ -500,7 +498,7 @@ public class KingschPosts extends javax.swing.JFrame {
 
     }
 
-    
+
     private void StartActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_StartActionPerformed
         try {
 
@@ -511,9 +509,9 @@ public class KingschPosts extends javax.swing.JFrame {
             String splitBy = ",";
             Reading:
             while ((line = br.readLine()) != null) {
-                
-                  OpenAndUpdateDriver("https://accounts.kingsch.at/?client_id=com.kingschat&scopes=%5B%22kingschat%22%5D&redirect_uri=https%3A%2F%2Fweb.kingsch.at%2Ftimeline");
-                
+
+                OpenAndUpdateDriver("https://accounts.kingsch.at/");
+
                 String[] email = line.split(splitBy);    // use comma as separator
                 String Email = email[0];
                 login(driver, Email);
