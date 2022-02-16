@@ -217,14 +217,13 @@ public class KingschPosts extends javax.swing.JFrame {
 
         try {
 
-            Thread.sleep(1000);
-            while (true) {
-                try {
-                    driver.findElement(By.xpath("//*[@class='CookiePopup__button']")).click(); //Click cookie Accept
-                    break;
-                } catch (Exception e) {
-                    Thread.sleep(500);
-                }
+            Thread.sleep(3000);
+
+            try {
+                driver.findElement(By.xpath("//*[@class='CookiePopup__button']")).click(); //Click cookie Accept
+
+            } catch (Exception e) {
+                Thread.sleep(500);
             }
 
             Thread.sleep(1000);
@@ -265,7 +264,6 @@ public class KingschPosts extends javax.swing.JFrame {
             if (!(Comment.isEmpty())) {
                 commentwriting(driver, Comment);
             }
-            driver.quit();
         } catch (Exception e) {
         }
 
