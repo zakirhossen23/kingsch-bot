@@ -151,9 +151,15 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
  private void followurl(WebDriver driver, String url) {
         working:
+        
         while (true) {
+            if (driver.getCurrentUrl() != url){
+                driver.navigate().to(url);
+                try {Thread.sleep(1000);}catch(Exception e){}
+                
+            }
             try {
-                driver.findElement(By.xpath("//*[@class=\"SuperuserProfile__actions-item ripple\"]")).click();
+                driver.findElement(By.xpath("//*[@class='FollowButton']")).click();
                 System.out.println("followed");
 
                 Thread.sleep(1000);
@@ -388,7 +394,7 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
             Reading:
             while ((line = br.readLine()) != null) {
 
-                OpenAndUpdateDriver("https://accounts.kingsch.at/?client_id=com.kingschat&scopes=%5B%22kingschat%22%5D&redirect_uri=https%3A%2F%2Fweb.kingsch.at%2Ftimeline");
+                OpenAndUpdateDriver("https://accounts.kingsch.at");
 
                 String[] email = line.split(splitBy);    // use comma as separator
                 String Email = email[0];
