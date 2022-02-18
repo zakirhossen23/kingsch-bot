@@ -108,7 +108,7 @@
               <Table columnCount="4" rowCount="0">
                 <Column editable="false" title="id" type="java.lang.Integer"/>
                 <Column editable="true" title="Text" type="java.lang.String"/>
-                <Column editable="true" title="Image/video" type="java.lang.String"/>
+                <Column editable="false" title="Image/video" type="java.lang.String"/>
                 <Column editable="true" title="time" type="java.lang.String"/>
               </Table>
             </Property>

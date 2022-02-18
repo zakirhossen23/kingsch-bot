@@ -132,7 +132,7 @@ public class KingschPosting extends javax.swing.JFrame {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, true, true
+                false, true, false, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -315,13 +315,25 @@ public class KingschPosting extends javax.swing.JFrame {
         acceptingCookie:
         while (true) {
             try {
+                Thread.sleep(1000);
                 driver.findElement(By.xpath("//*[@class=\"CookiePopup__button\"]")).click();  //accept cookie
-                Thread.sleep(1500);
+
                 break;
             } catch (Exception e) {
 
             }
         }
+        clickingPost:
+        while (true) {
+            try {
+                driver.findElement(By.xpath("//*[@aria-label='create-post']")).click();  //Create Post
+                break;
+            } catch (Exception e) {
+                driver.findElement(By.xpath("//*[@class='LeftPanelButtons__blue-button']")).click();  //Create Post
+
+            }
+        }
+
         writingText:
         while (true) {
             try {
@@ -331,9 +343,8 @@ public class KingschPosting extends javax.swing.JFrame {
                 clipboard.setContents(stringSelection, null);
 
                 Actions actions = new Actions(driver);
+                Thread.sleep(1500);
 
-                driver.findElement(By.xpath("//*[@class='LeftPanelButtons__blue-button']")).click();  //comment
-                Thread.sleep(500);
                 actions.keyDown(Keys.CONTROL);
                 actions.sendKeys("v").build().perform();
                 actions.keyUp(Keys.CONTROL);
@@ -360,7 +371,11 @@ public class KingschPosting extends javax.swing.JFrame {
             try {
                 if (driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).getAttribute("class").contains("active")) {
                     driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).click();  //post
-                }else{continue;}
+                      Thread.sleep(700);
+
+                } else {
+                    continue;
+                }
                 break Posting;
             } catch (Exception e) {
             }
