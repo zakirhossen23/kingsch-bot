@@ -488,8 +488,8 @@ public class KingschPosts extends javax.swing.JFrame {
                 System.setProperty("webdriver.chrome.driver", "ChromeDriver\\chromedriver.exe");
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--mute-audio");
-                KingschAccount.StatusLBL.setText("Adding extension...");
-                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
+//                KingschAccount.StatusLBL.setText("Adding extension...");
+//                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 KingschAccount.StatusLBL.setText("Setting...");

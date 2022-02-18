@@ -108,7 +108,7 @@
               <Table columnCount="4" rowCount="0">
                 <Column editable="false" title="id" type="java.lang.Integer"/>
                 <Column editable="true" title="Text" type="java.lang.String"/>
-                <Column editable="false" title="Image" type="java.lang.String"/>
+                <Column editable="true" title="Image/video" type="java.lang.String"/>
                 <Column editable="true" title="time" type="java.lang.String"/>
               </Table>
             </Property>
@@ -173,7 +173,7 @@
     </Component>
     <Component class="javax.swing.JTextField" name="ImagePath">
       <Properties>
-        <Property name="text" type="java.lang.String" value="Image Path"/>
+        <Property name="text" type="java.lang.String" value="Image/Video Path"/>
         <Property name="enabled" type="boolean" value="false"/>
         <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
           <Dimension value="[62, 20]"/>

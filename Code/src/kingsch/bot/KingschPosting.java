@@ -125,14 +125,14 @@ public class KingschPosting extends javax.swing.JFrame {
 
             },
             new String [] {
-                "id", "Text", "Image", "time"
+                "id", "Text", "Image/video", "time"
             }
         ) {
             Class[] types = new Class [] {
                 java.lang.Integer.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
             };
             boolean[] canEdit = new boolean [] {
-                false, true, false, true
+                false, true, true, true
             };
 
             public Class getColumnClass(int columnIndex) {
@@ -177,7 +177,7 @@ public class KingschPosting extends javax.swing.JFrame {
             }
         });
 
-        ImagePath.setText("Image Path");
+        ImagePath.setText("Image/Video Path");
         ImagePath.setEnabled(false);
         ImagePath.setMaximumSize(new java.awt.Dimension(62, 20));
         ImagePath.setMinimumSize(new java.awt.Dimension(62, 20));
@@ -311,7 +311,18 @@ public class KingschPosting extends javax.swing.JFrame {
     }
 
     private void StartingPost(WebDriver driver, String Text, String ImageurL) {
-        writingText:
+        
+        acceptingCookie:
+        while(true){
+            try{
+             driver.findElement(By.xpath("//*[@class=\"CookiePopup__button\"]")).click();  //accept cookie
+             Thread.sleep(1500);
+             break;
+            }catch(Exception e){
+                 
+            }
+        }
+             writingText:
         while (true) {
             try {
                 String myString = Text;
@@ -321,7 +332,8 @@ public class KingschPosting extends javax.swing.JFrame {
 
                 Actions actions = new Actions(driver);
 
-                driver.findElement(By.xpath("//*[@placeholder=\"What's happening?\"]")).click();  //comment
+                driver.findElement(By.xpath("//*[@class=\"CreateNewPostBox__main-container\"]")).click();  //comment
+                    Thread.sleep(500);
                 actions.keyDown(Keys.CONTROL);
                 actions.sendKeys("v").build().perform();
                 actions.keyUp(Keys.CONTROL);
@@ -330,21 +342,24 @@ public class KingschPosting extends javax.swing.JFrame {
             } catch (Exception e) {
             }
         }
+       
         if (!(ImageurL == "")) {
             inputtingfile:
             while (true) {
                 try {
-                    driver.findElement(By.xpath("//*[@type=\"file\"]")).sendKeys(ImageurL);  //file
-                    Thread.sleep(5000);
+                    driver.findElement(By.xpath("(//*[@type=\"file\"])[2]")).sendKeys(ImageurL);  //file
+                    Thread.sleep(4000);
                     break inputtingfile;
                 } catch (Exception e) {
                 }
             }
         }
+    
+        
         Posting:
         while (true) {
             try {
-                driver.findElement(By.xpath("//div[contains(text(), \"Post to Timeline\")]")).click();  //post
+                driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).click();  //post
                 break Posting;
             } catch (Exception e) {
             }
@@ -536,8 +551,8 @@ public class KingschPosting extends javax.swing.JFrame {
                 System.setProperty("webdriver.chrome.driver", "ChromeDriver\\chromedriver.exe");
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--mute-audio");
-                KingschAccount.StatusLBL.setText("Adding extension...");
-                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
+//                KingschAccount.StatusLBL.setText("Adding extension...");
+//                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 KingschAccount.StatusLBL.setText("Setting...");
@@ -597,7 +612,7 @@ public class KingschPosting extends javax.swing.JFrame {
             } catch (Exception e) {
             }
             try {
-                OpenAndUpdateDriver("https://accounts.kingsch.at/?client_id=com.kingschat&scopes=%5B%22kingschat%22%5D&redirect_uri=https%3A%2F%2Fweb.kingsch.at%2Ftimeline");
+                OpenAndUpdateDriver("https://accounts.kingsch.at/?client_id=com.kingschat&post_redirect=true&scopes=%5B\"kingschat\"%5D&redirect_uri=https%3A%2F%2Fkingschat.online%2F");
                 login(driver, Email);
 
             } catch (Exception e) {

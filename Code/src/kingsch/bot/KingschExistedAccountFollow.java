@@ -21,6 +21,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
@@ -49,8 +50,29 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
      */
     public KingschExistedAccountFollow() {
         initComponents();
+        
     }
+//     List<String> list = new List<String>();
+//
+//List<String> EmailList = new List<String>();
 
+    private void importEmail(){
+        try{
+        
+            BufferedReader br = null;
+            br = new BufferedReader(new FileReader("C:\\Program Files\\Common Files\\CSVS\\Account.csv"));
+            String line = "";
+
+            String splitBy = ",";
+            Reading:
+            while ((line = br.readLine()) != null) {
+                
+            }
+        }catch(Exception e){}
+      
+        
+    
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -66,6 +88,7 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
         jButton2 = new javax.swing.JButton();
         urlText = new javax.swing.JTextField();
         InsertBtn = new javax.swing.JButton();
+        jButton3 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -110,6 +133,13 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
             }
         });
 
+        jButton3.setText("Re-shuffle");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -123,10 +153,12 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(18, 18, 18)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jButton1, javax.swing.GroupLayout.DEFAULT_SIZE, 115, Short.MAX_VALUE)
+                            .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap(22, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
@@ -140,11 +172,13 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
                 .addComponent(InsertBtn)
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
-                .addGap(143, 143, 143)
+                .addGap(84, 84, 84)
+                .addComponent(jButton3)
+                .addGap(18, 18, 18)
                 .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 23, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGap(18, 18, 18)
                 .addComponent(jButton2)
-                .addContainerGap(153, Short.MAX_VALUE))
+                .addContainerGap(164, Short.MAX_VALUE))
         );
 
         pack();
@@ -163,7 +197,7 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
                 System.out.println("followed");
 
                 Thread.sleep(1000);
-                break working;
+                return;
             } catch (Exception e) {
             }
         }
@@ -355,8 +389,8 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
                 System.setProperty("webdriver.chrome.driver", "ChromeDriver\\chromedriver.exe");
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--mute-audio");
-                KingschAccount.StatusLBL.setText("Adding extension...");
-                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
+               // KingschAccount.StatusLBL.setText("Adding extension...");
+               // options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 KingschAccount.StatusLBL.setText("Setting...");
@@ -430,6 +464,10 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
         DefaultTableModel model = (DefaultTableModel) ContainingTable.getModel();
         model.addRow(new Object[]{urlText.getText()});
     }//GEN-LAST:event_InsertBtnActionPerformed
+
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
     private void login(WebDriver driver, String email) {
         driver.findElement(By.xpath("//*[@placeholder=\"Username, Phone Number or E-mail\"]")).sendKeys(email);
         driver.findElement(By.xpath("//*[@placeholder=\"Password\"]")).sendKeys("Q123456789");
@@ -477,6 +515,7 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
     private javax.swing.JButton InsertBtn;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
+    private javax.swing.JButton jButton3;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTextField urlText;
     // End of variables declaration//GEN-END:variables
