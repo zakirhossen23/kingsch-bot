@@ -311,18 +311,18 @@ public class KingschPosting extends javax.swing.JFrame {
     }
 
     private void StartingPost(WebDriver driver, String Text, String ImageurL) {
-        
+
         acceptingCookie:
-        while(true){
-            try{
-             driver.findElement(By.xpath("//*[@class=\"CookiePopup__button\"]")).click();  //accept cookie
-             Thread.sleep(1500);
-             break;
-            }catch(Exception e){
-                 
+        while (true) {
+            try {
+                driver.findElement(By.xpath("//*[@class=\"CookiePopup__button\"]")).click();  //accept cookie
+                Thread.sleep(1500);
+                break;
+            } catch (Exception e) {
+
             }
         }
-             writingText:
+        writingText:
         while (true) {
             try {
                 String myString = Text;
@@ -332,8 +332,8 @@ public class KingschPosting extends javax.swing.JFrame {
 
                 Actions actions = new Actions(driver);
 
-                driver.findElement(By.xpath("//*[@class=\"CreateNewPostBox__main-container\"]")).click();  //comment
-                    Thread.sleep(500);
+                driver.findElement(By.xpath("//*[@class='LeftPanelButtons__blue-button']")).click();  //comment
+                Thread.sleep(500);
                 actions.keyDown(Keys.CONTROL);
                 actions.sendKeys("v").build().perform();
                 actions.keyUp(Keys.CONTROL);
@@ -342,7 +342,7 @@ public class KingschPosting extends javax.swing.JFrame {
             } catch (Exception e) {
             }
         }
-       
+
         if (!(ImageurL == "")) {
             inputtingfile:
             while (true) {
@@ -354,12 +354,13 @@ public class KingschPosting extends javax.swing.JFrame {
                 }
             }
         }
-    
-        
+
         Posting:
         while (true) {
             try {
-                driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).click();  //post
+                if (driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).getAttribute("class").contains("active")) {
+                    driver.findElement(By.xpath("//*[contains(text(), 'Publish Post')]")).click();  //post
+                }else{continue;}
                 break Posting;
             } catch (Exception e) {
             }

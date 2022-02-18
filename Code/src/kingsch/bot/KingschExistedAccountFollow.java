@@ -54,7 +54,7 @@ public class KingschExistedAccountFollow extends javax.swing.JFrame {
     }
 //     List<String> list = new List<String>();
 //
-//List<String> EmailList = new List<String>();
+ //List<String> EmailList = new List<String>();
 
     private void importEmail(){
         try{
