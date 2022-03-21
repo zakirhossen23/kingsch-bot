@@ -23,6 +23,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
@@ -237,11 +238,17 @@ public class StartAccount extends Thread {
     }
 
     private void fillupforsignup(WebDriver driver) {
+
         driver.findElement(By.xpath("//*[@name='email']")).sendKeys(email);
         driver.findElement(By.xpath("//*[@name='name']")).sendKeys(name);
-        driver.findElement(By.xpath("//*[@name='username']")).sendKeys(name.replaceAll("\\s+", "") + "1234");
+        Random r = new Random();
+        int low = 1950;
+        int high = 3000;
+        int x = r.nextInt(high - low) + low;
+        driver.findElement(By.xpath("//*[@name='username']")).sendKeys(name.replaceAll("\\s+", "") + String.valueOf(x));
         driver.findElement(By.xpath("//*[@name='password']")).sendKeys("Q123456789");
         driver.findElement(By.xpath("//*[@class='submit-btn']")).click();
+
     }
 
     String email = "";
@@ -331,16 +338,17 @@ public class StartAccount extends Thread {
         driver.findElement(By.xpath("//*[@placeholder=\"Username, Phone Number or E-mail\"]")).sendKeys(email);
         driver.findElement(By.xpath("//*[@placeholder=\"Password\"]")).sendKeys("Q123456789");
         driver.findElement(By.xpath("(//*[@class=\"submit-btn\"])[1]")).click();
-
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException ex) {
+        }
     }
 
     private static ChromeDriver driver;
 
     private void savedata() {
         try {
-            File accFile = new File("C:\\Program Files\\Common Files\\CSVS\\Account.csv");
-            accFile.getParentFile().mkdirs();
-            accFile.createNewFile(); // if file already exists will do nothing
+       
             FileWriter writer = new FileWriter("C:\\Program Files\\Common Files\\CSVS\\Account.csv", true);
             BufferedWriter Bwriter = new BufferedWriter(writer);
             PrintWriter Pwriter = new PrintWriter(Bwriter);
@@ -349,7 +357,7 @@ public class StartAccount extends Thread {
             Pwriter.close();
             System.out.println("saved");
         } catch (Exception e) {
-
+            System.out.println(e);
         }
     }
 
@@ -676,24 +684,30 @@ public class StartAccount extends Thread {
                     }
                     KingschAccount.StatusLBL.setText("Verifying Account...");
                     verfiyaccount(driver);
+                    Thread.sleep(5000);
+
                     KingschAccount.StatusLBL.setText("Saving data into csv...");
                     savedata();
-                    KingschAccount.StatusLBL.setText("Going to login for follow main account...");
-                    driver.navigate().to("https://accounts.kingsch.at/?client_id=com.kingschat&scopes=%5B%22kingschat%22%5D&redirect_uri=https%3A%2F%2Fweb.kingsch.at%2Fsuperusers%2Fqubwebs");
+                    KingschAccount.StatusLBL.setText("Doing login...");
+                    driver.navigate().to("https://accounts.kingsch.at/");
+                    Thread.sleep(2000);
                     login(driver);
-                    KingschAccount.StatusLBL.setText("Waiting 1 second...");
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
+                    driver.navigate().to("https://kingschat.online/user/qubwebs");
+
+                    KingschAccount.StatusLBL.setText("Waiting 1.5 second...");
+                    Thread.sleep(1500);
                     KingschAccount.StatusLBL.setText("Clicking Follow button...");
                     while (true) {
                         try {
-                            driver.findElement(By.xpath("//*[@class='SuperuserProfile__actions-item ripple']")).click();
+                            driver.findElement(By.xpath("//*[@class=\"FollowButton\"]")).click();
                             System.out.println("followed main");
                             break;
                         } catch (Exception e) {
                         }
                     }
                     KingschAccount.StatusLBL.setText("Going to check if there was any url in the table...");
-                    Thread.sleep(500);
+                    Thread.sleep(800);
                     DefaultTableModel model = (DefaultTableModel) KingschAccount.ContainingTable.getModel();
                     all:
                     for (int i = 0; i < model.getRowCount(); i++) {
@@ -702,16 +716,15 @@ public class StartAccount extends Thread {
                         if (url.contains("https://")) {
                             KingschAccount.StatusLBL.setText("Going to " + url);
                             driver.navigate().to(url);
+                             Thread.sleep(800);
                             working:
                             while (true) {
                                 try {
                                     KingschAccount.StatusLBL.setText("Trying to follow...");
-                                    driver.findElement(By.xpath("//*[@class=\"SuperuserProfile__actions-item ripple\"]")).click();
+                                    driver.findElement(By.xpath("//*[@class=\"FollowButton\"]")).click();
                                     System.out.println("followed");
                                     KingschAccount.StatusLBL.setText("Followed...");
-                                    KingschAccount.StatusLBL.setText("Verifying...");
-                                    Thread.sleep(1000);
-                                    KingschAccount.StatusLBL.setText("verified...");
+                                    Thread.sleep(1500);
                                     break working;
                                 } catch (Exception e) {
                                 }

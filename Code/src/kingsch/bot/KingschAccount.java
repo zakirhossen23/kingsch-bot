@@ -65,6 +65,7 @@ public class KingschAccount extends javax.swing.JFrame {
         Killprocess = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setTitle("Create Account");
 
         jButton1.setText("Start");
         jButton1.addActionListener(new java.awt.event.ActionListener() {
