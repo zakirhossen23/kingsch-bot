@@ -1,20 +1,22 @@
 package kingsch.bot;
 
+import com.google.i18n.phonenumbers.PhoneNumberUtil;
+import com.google.i18n.phonenumbers.Phonenumber.PhoneNumber;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.DesiredCapabilities;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
 
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.datatransfer.*;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
@@ -26,25 +28,21 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class StartAccount extends Thread {
+
+    private static ChromeDriver driver;
+    String email = "";
+    String name = "";
+    String countrycode = "";
+    String Pnumber = "";
+    String Countryname = null;
+    String typeRun = "";
+    private boolean done = false;
 
     public static void stopfile() {
         driver.quit();
@@ -52,148 +50,122 @@ public class StartAccount extends Thread {
     }
 
     public static void downloadFile(URL url, String outputFileName) throws IOException {
-        try ( InputStream in = url.openStream();  ReadableByteChannel rbc = Channels.newChannel(in);  FileOutputStream fos = new FileOutputStream(outputFileName)) {
+        try (InputStream in = url.openStream(); ReadableByteChannel rbc = Channels.newChannel(in); FileOutputStream fos = new FileOutputStream(outputFileName)) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
     }
 
+    private static void unzip(Path source, Path target) throws IOException {
+
+        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+
+            // list files in zip
+            ZipEntry zipEntry = zis.getNextEntry();
+
+            while (zipEntry != null) {
+
+                boolean isDirectory = zipEntry.getName().endsWith(File.separator);
+                // example 1.1
+                // some zip stored files and folders separately
+                // e.g data/
+                //     data/folder/
+                //     data/folder/file.txt
+
+                Path newPath = zipSlipProtect(zipEntry, target);
+
+                if (isDirectory) {
+                    java.nio.file.Files.createDirectories(newPath);
+                } else {
+
+                    // example 1.2
+                    // some zip stored file path only, need create parent directories
+                    // e.g data/folder/file.txt
+                    if (newPath.getParent() != null) {
+                        if (java.nio.file.Files.notExists(newPath.getParent())) {
+                            java.nio.file.Files.createDirectories(newPath.getParent());
+                        }
+                    }
+
+                    // copy files, nio
+                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
+
+                    zis.close();
+                    // copy files, classic
+                    /*try (FileOutputStream fos = new FileOutputStream(newPath.toFile())) {
+                        byte[] buffer = new byte[1024];
+                        int len;
+                        while ((len = zis.read(buffer)) > 0) {
+                            fos.write(buffer, 0, len);
+                        }
+                    }*/
+                }
+
+                zipEntry = zis.getNextEntry();
+
+            }
+            zis.closeEntry();
+
+        }
+
+    }
+
+    public static Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
+            throws IOException {
+
+        // test zip slip vulnerability
+        // Path targetDirResolved = targetDir.resolve("../../" + zipEntry.getName());
+        Path targetDirResolved = targetDir.resolve(zipEntry.getName());
+
+        // make sure normalized file still has targetDir as its prefix
+        // else throws exception
+        Path normalizePath = targetDirResolved.normalize();
+        if (!normalizePath.startsWith(targetDir)) {
+            throw new IOException("Bad zip entry: " + zipEntry.getName());
+        }
+
+        return normalizePath;
+    }
+
+
+    private String textTocapitalize(String message) {
+        // stores each characters to a char array
+        char[] charArray = message.toCharArray();
+        boolean foundSpace = true;
+
+        for (int i = 0; i < charArray.length; i++) {
+
+            // if the array element is a letter
+            if (Character.isLetter(charArray[i])) {
+
+                // check space is present before the letter
+                if (foundSpace) {
+
+                    // change the letter into uppercase
+                    charArray[i] = Character.toUpperCase(charArray[i]);
+                    foundSpace = false;
+                } else {
+                    // change the letter into toLowerCase
+                    charArray[i] = Character.toLowerCase(charArray[i]);
+                }
+            } else {
+                // if the new character is not character
+                foundSpace = true;
+            }
+        }
+        message = String.valueOf(charArray);
+        return message;
+    }
+//------------------------------------------------------------------------------Captcha Solving------------------------------------------------------------
     private void phonecaptchasolving(ChromeDriver driver) throws InterruptedException {
         Allwork:
         while (true) {
-            while (true) {           //clicking solver
-                try {
-                    Thread.sleep(2000);
-                    try {
-                        driver.switchTo().frame(driver.findElementByXPath("(//*[@title=\"recaptcha challenge\"])[2]"));
-                    } catch (Exception e) {
-                    }
-
-                    driver.findElement(By.xpath("//*[@class='button-holder help-button-holder']")).click();
-                    String myString = driver.getPageSource();
-                    break;
-                } catch (Exception e) {
-                    Thread.sleep(2000);
-                    String value = new String();
-                    value = driver.getPageSource();
-                    if (!value.contains("If there are none, click skip")) {
-                        break;
-
-                    }
-                }
-            }
-
-            verifying:
-            while (true) {
-                String value = driver.getPageSource();
-                if (value.contains("Press PLAY to listen")) {
-
-                    break verifying;
-                } else {
-
-                }
-                var value2 = driver.getPageSource();
-                if (value2.contains("Multiple correct solutions required - please solve more.")) {
-                    driver.findElement(By.xpath("//*[@class=\"button-holder help-button-holder\"]")).click();
-                    continue verifying;
-                } else {
-                    break verifying;
-                }
-            }
-
-            String value = driver.getPageSource();
-            if (value.contains("Try again")) {
-                try {
-                    driver.findElement(By.xpath("//*[@id=\"reset-button\"]")).click();
-                    driver.switchTo().defaultContent();
-                    driver.findElement(By.xpath("//*[@class='submit-btn']")).click();
-                    continue Allwork;
-                } catch (Exception e) {
-                }
-            }
-
             try {
-                driver.switchTo().defaultContent();
                 String value1 = driver.getPageSource();
-                if (value1.contains("We have sent you an")) {
+                if (value1.contains("We have sent")) {
                     break Allwork;
                 }
             } catch (Exception e) {
             }
-            driver.switchTo().frame(2);
-            String answer = "";
-            String value1 = driver.getPageSource();
-
-            try {
-
-                if (value1.contains("Press PLAY to listen")) {
-
-                    try {
-                        URL url = new URL(driver.findElement(By.xpath("//*[@class=\"rc-audiochallenge-tdownload-link\"]")).getAttribute("href"));
-                        downloadFile(url, "audio.mp3");
-                    } catch (Exception e) {
-                    }
-
-                    driver.executeScript("window.open();");
-                    ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
-                    driver.switchTo().window(tabs2.get(1));
-                    driver.switchTo().defaultContent();
-                    driver.navigate().to("https://speech-to-text-demo.ng.bluemix.net/#text");
-                    Thread.sleep(1000);
-                    try {
-                        driver.findElement(By.xpath("//*[@class=\"truste_box_overlay\"]"));
-                        while (true) {
-                            try {
-                                driver.switchTo().frame(driver.findElement(By.xpath("//*[@title=\"TrustArc Cookie Consent Manager\"]")));
-                                driver.findElement(By.xpath("//a[text()='Accept Default']")).click();
-                                break;
-                            } catch (Exception e) {
-                            }
-                        }
-                    } catch (Exception e) {
-                    }
-                    driver.findElement(By.xpath("//*[@type=\"file\"]")).sendKeys(System.getProperty("user.dir") + "/audio.mp3");
-                    Thread.sleep(5000);
-                    while (true) {
-                        try {
-                            answer = driver.findElement(By.xpath("//*[@data-id=\"Text\"]")).getText();
-                            break;
-                        } catch (Exception e) {
-                        }
-                    }
-                    driver.close();
-                    try {
-                        ArrayList<String> tabs1 = new ArrayList<String>(driver.getWindowHandles());
-                        driver.switchTo().window(tabs1.get(0));
-                    } catch (Exception e) {
-                    }
-                    try {
-                        driver.switchTo().frame(2);
-                    } catch (Exception e) {
-                    }
-
-                    inputing:
-                    while (true) {
-                        try {
-                            driver.findElement(By.xpath("//*[@id=\"audio-response\"]")).sendKeys(answer);
-                            break inputing;
-                        } catch (Exception e) {
-                        }
-
-                    }
-
-                    verifybutton:
-                    while (true) {
-                        try {
-                            driver.findElement(By.xpath("//*[@id=\"recaptcha-verify-button\"]")).click();
-                            break verifybutton;
-                        } catch (Exception e) {
-                        }
-
-                    }
-                }
-            } catch (Exception e) {
-            }
-
         }
     }
 
@@ -210,29 +182,24 @@ public class StartAccount extends Thread {
             }
         }
     }
-
+//------------------------------------------------------------------------------Fill UP signup------------------------------------------------------------
     private void fillupforphonesignup(WebDriver driver) {
         driver.findElement(By.xpath("//*[@class='CountrySelect__wrapper']/div")).click();
 
         String searchingCountry = "//*[@class=\"CountrySelect__option\"]/span";
         try {
-            for (int i = 0; i < 2; i++) {
-                String adding = "[contains(text(),'" + Countryname[i].toString() + "')]";
-                searchingCountry = searchingCountry + adding;
+            restart:
+            while (true) {
+                Countryname = textTocapitalize(Countryname);
+                 driver.findElement(By.xpath("//*[contains(text(),'" + Countryname + "')]/parent::*/*[contains(text(),'"+countrycode+"')]/parent::*")).click();
+                //driver.findElement(By.xpath("//*[contains(text(),'" + Countryname + "')]")).click();
+                break;
             }
 
         } catch (Exception e) {
         }
 
-        while (true) {
-            try {
-                driver.findElement(By.xpath(searchingCountry)).click();
-                break;
-            } catch (Exception e) {
-            }
-        }
-
-        driver.findElement(By.xpath("//*[@name=\"phone_number\"]")).sendKeys(Pnumber);
+        driver.findElement(By.xpath("//*[@name=\"phone_number\"]")).sendKeys(Pnumber.replace("+", ""));
         driver.findElement(By.xpath("//*[@class=\"form-actions\"]")).click(); //*[@class="CountrySelect__option"]/span[contains(text(),'Malay')][contains(text(),'')]
 
     }
@@ -245,15 +212,12 @@ public class StartAccount extends Thread {
         int low = 1950;
         int high = 3000;
         int x = r.nextInt(high - low) + low;
-        driver.findElement(By.xpath("//*[@name='username']")).sendKeys(name.replaceAll("\\s+", "") + String.valueOf(x));
+        driver.findElement(By.xpath("//*[@name='username']")).sendKeys(name.replaceAll("\\s+", "") + x);
         driver.findElement(By.xpath("//*[@name='password']")).sendKeys("Q123456789");
         driver.findElement(By.xpath("//*[@class='submit-btn']")).click();
 
     }
-
-    String email = "";
-    String name = "";
-
+//------------------------------------------------------------------------------Get Email/Name------------------------------------------------------------
     private void getemail(WebDriver driver) {
         while (true) {
             try {
@@ -270,6 +234,69 @@ public class StartAccount extends Thread {
 
     private void getname(WebDriver driver) {
         name = driver.findElement(By.xpath("(//*[@class=\"nameList\"]/li)[1]")).getText();
+    }
+//---------------------------------------------------------------------------------Verify------------------------------------------------------------
+    private void verfiyaccountPhone(WebDriver driver) {   //🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏
+        ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
+        driver.switchTo().window(tabs2.get(0));
+
+        driver.switchTo().defaultContent();
+
+        Again:
+        while (true) {
+            try {
+                driver.switchTo().frame(0);
+            } catch (Exception e) {
+            }
+            try {
+                driver.findElement(By.xpath("(//*[@aria-current=\"page\"])[3]")).click();
+                Thread.sleep(200);
+                break;
+            } catch (Exception e) {
+            }
+        }
+        while (true) {
+            try {
+                driver.switchTo().defaultContent();
+            } catch (Exception e) {
+            }
+            try {
+                try {
+                    driver.switchTo().defaultContent();
+                } catch (Exception e) {
+                }
+                driver.findElement(By.xpath("//*[@id=\"__layout\"]/div/div[2]/main/div/div[2]/ul/li/a/div")).click();   //click mail
+                break;
+            } catch (Exception e) {
+                try {
+                    driver.switchTo().frame(0);
+                } catch (Exception e2) {
+                }
+                try {
+                    driver.findElement(By.xpath("(//*[@aria-current=\"page\"])[3]")).click();
+                } catch (Exception e23) {
+                }
+            }
+        }
+        driver.switchTo().defaultContent();
+        try {
+            driver.switchTo().frame(0);
+        } catch (Exception e) {
+        }
+
+        while (true) {
+            try {
+                driver.switchTo().defaultContent();
+
+                driver.switchTo().frame(0);
+
+                driver.navigate().to(driver.findElement(By.xpath("//*[contains(text(),'verify_email?')]")).getAttribute("href"));  //go to verification
+                break;
+            } catch (Exception e) {
+
+            }
+
+        }
     }
 
     private void verfiyaccount(WebDriver driver) {   //🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏
@@ -333,7 +360,7 @@ public class StartAccount extends Thread {
 
         }
     }
-
+//---------------------------------------------------------------------------------Login------------------------------------------------------------
     private void login(WebDriver driver) {
         driver.findElement(By.xpath("//*[@placeholder=\"Username, Phone Number or E-mail\"]")).sendKeys(email);
         driver.findElement(By.xpath("//*[@placeholder=\"Password\"]")).sendKeys("Q123456789");
@@ -343,12 +370,10 @@ public class StartAccount extends Thread {
         } catch (InterruptedException ex) {
         }
     }
-
-    private static ChromeDriver driver;
-
+//-------------------------------------------------------------------------------Save data------------------------------------------------------------
     private void savedata() {
         try {
-       
+
             FileWriter writer = new FileWriter("C:\\Program Files\\Common Files\\CSVS\\Account.csv", true);
             BufferedWriter Bwriter = new BufferedWriter(writer);
             PrintWriter Pwriter = new PrintWriter(Bwriter);
@@ -360,7 +385,7 @@ public class StartAccount extends Thread {
             System.out.println(e);
         }
     }
-
+//---------------------------------------------------------------------------------Email------------------------------------------------------------
     private void Emailwork() {
         try {
             OpenAndUpdateDriver("https://mail.tm/en/");
@@ -369,22 +394,23 @@ public class StartAccount extends Thread {
 
         }
     }
-    String countrycode = "";
-    String Pnumber = "";
-    String Countryname[] = null;
-
+//---------------------------------------------------------------------------------Phone------------------------------------------------------------
     private void getphone(WebDriver driver) {
-
-        driver.findElement(By.xpath("//*[@class='layui-btn clickA']")).sendKeys(Keys.SPACE);
+        try {
+            driver.findElement(By.xpath("//*[contains(text(),'another number')]/parent::*")).click();
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+        String numberStr = "+16465106465";
         while (true) {
 
             try {
-                Thread.sleep(3000);
+                Thread.sleep(4000);
             } catch (Exception e) {
             }
-            if (driver.getCurrentUrl() != "https://mytempsms.com/receive-sms-online/malaysia-phone-number-1128652898.html") {
+            if (driver.getCurrentUrl() != "https://receive-smss.com/sms/16465106465/") {
                 try {
-                    driver.findElement(By.xpath("//*[@class=\"copy\"]"));
+                    numberStr = "+" + driver.findElement(By.xpath("//*[@class=\"tooltip\"]/a")).getAttribute("data-attrib");
 
                 } catch (Exception e) {
                     continue;
@@ -397,15 +423,23 @@ public class StartAccount extends Thread {
         while (true) {
             try {
 
-                countrycode = driver.findElement(By.xpath("//*[@class=\"copy\"]/img")).getAttribute("src");
-                Pattern intsOnly = Pattern.compile("\\d+");
-                Matcher makeMatch = intsOnly.matcher(countrycode);
-                makeMatch.find();
-                String inputInt = makeMatch.group();
-                countrycode = inputInt;
-                Pnumber = driver.findElement(By.xpath("//*[@class=\"copy\"]")).getAttribute("data-clipboard-text");
-                Countryname = driver.findElement(By.xpath("//*[@class=\"info-top-h1\"]/h1")).getText().replace("Free Receive SMS From ", "").split("(?=\\p{Upper})");
-                System.out.println(Countryname[0]);
+                PhoneNumberUtil phoneUtil = PhoneNumberUtil.getInstance();
+                try {
+                    PhoneNumber numberProto = phoneUtil.parse(numberStr, "");
+
+                    System.out.println("Country code: " + numberProto.getCountryCode());
+                    countrycode = String.valueOf(numberProto.getCountryCode());
+                    //This prints "Country code: 91"
+                } catch (Exception e) {
+                    System.err.println("NumberParseException was thrown: " + e);
+                }
+
+                Pnumber = numberStr.replace(countrycode, "");
+                Countryname = driver.findElement(By.xpath("//h2[@class='page-description']")).getText().replace(" MOBILE PHONE NUMBER.", "");
+
+                Countryname = Countryname.replace(numberStr + " IS A ", "");
+
+                System.out.println(Countryname);
                 break;
             } catch (Exception e) {
             }
@@ -413,10 +447,13 @@ public class StartAccount extends Thread {
     }
 
     private void Phonework(WebDriver driver) {
-        driver.navigate().to("https://mytempsms.com/receive-sms-online/uk-phone-number-5020203597.html");
-        getphone(driver);
+        try {
+            driver = OpenAndUpdateDriver("https://receive-smss.com/sms/16465106465/#:~:text=%E2%86%BB%20Give%20me%20another%20number");
+            getphone(driver);
+        } catch (Exception ex) {
+
+        }
     }
-    private boolean done = false;
 
     private void keepchecking() {
         if (KingschAccount.stopWork == true) {
@@ -424,82 +461,7 @@ public class StartAccount extends Thread {
         }
     }
 
-    private static void unzip(Path source, Path target) throws IOException {
-
-        try ( ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
-
-            // list files in zip
-            ZipEntry zipEntry = zis.getNextEntry();
-
-            while (zipEntry != null) {
-
-                boolean isDirectory = false;
-                // example 1.1
-                // some zip stored files and folders separately
-                // e.g data/
-                //     data/folder/
-                //     data/folder/file.txt
-                if (zipEntry.getName().endsWith(File.separator)) {
-                    isDirectory = true;
-                }
-
-                Path newPath = zipSlipProtect(zipEntry, target);
-
-                if (isDirectory) {
-                    java.nio.file.Files.createDirectories(newPath);
-                } else {
-
-                    // example 1.2
-                    // some zip stored file path only, need create parent directories
-                    // e.g data/folder/file.txt
-                    if (newPath.getParent() != null) {
-                        if (java.nio.file.Files.notExists(newPath.getParent())) {
-                            java.nio.file.Files.createDirectories(newPath.getParent());
-                        }
-                    }
-
-                    // copy files, nio
-                    Files.copy(zis, newPath, StandardCopyOption.REPLACE_EXISTING);
-
-                    zis.close();
-                    // copy files, classic
-                    /*try (FileOutputStream fos = new FileOutputStream(newPath.toFile())) {
-                        byte[] buffer = new byte[1024];
-                        int len;
-                        while ((len = zis.read(buffer)) > 0) {
-                            fos.write(buffer, 0, len);
-                        }
-                    }*/
-                }
-
-                zipEntry = zis.getNextEntry();
-
-            }
-            zis.closeEntry();
-
-        }
-
-    }
-    // protect zip slip attack
-
-    public static Path zipSlipProtect(ZipEntry zipEntry, Path targetDir)
-            throws IOException {
-
-        // test zip slip vulnerability
-        // Path targetDirResolved = targetDir.resolve("../../" + zipEntry.getName());
-        Path targetDirResolved = targetDir.resolve(zipEntry.getName());
-
-        // make sure normalized file still has targetDir as its prefix
-        // else throws exception
-        Path normalizePath = targetDirResolved.normalize();
-        if (!normalizePath.startsWith(targetDir)) {
-            throw new IOException("Bad zip entry: " + zipEntry.getName());
-        }
-
-        return normalizePath;
-    }
-
-    private void OpenAndUpdateDriver(String url) throws Exception {
+    private ChromeDriver OpenAndUpdateDriver(String url) throws Exception {
         boolean update = false;
         String ChromeVersion = "";
         String ChromeDriverVersion = "";
@@ -533,7 +495,7 @@ public class StartAccount extends Thread {
                 try {
                     Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");
                 } catch (Exception e) {
-                };
+                }
                 KingschAccount.StatusLBL.setText("Closed ChromeDriver");
                 KingschAccount.StatusLBL.setText("Deleting Old ChromeDriver...");
                 File Des = new File("ChromeDriver\\chromedriver.exe");
@@ -556,7 +518,7 @@ public class StartAccount extends Thread {
                 try {
                     Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");
                 } catch (Exception e) {
-                };
+                }
                 KingschAccount.StatusLBL.setText("Closed ChromeDriver");
                 BufferedOutputStream bout = new BufferedOutputStream(fos, 1024);
 
@@ -582,7 +544,7 @@ public class StartAccount extends Thread {
                 try {
                     Runtime.getRuntime().exec("taskkill /F /IM chromedriver.exe");
                 } catch (Exception e) {
-                };
+                }
                 KingschAccount.StatusLBL.setText("Closed ChromeDriver");
                 Thread.sleep(1000);
                 //Uzipping
@@ -609,13 +571,13 @@ public class StartAccount extends Thread {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--mute-audio");
                 KingschAccount.StatusLBL.setText("Adding extension...");
-                options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
+              //  options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 KingschAccount.StatusLBL.setText("Setting...");
                 driver = new ChromeDriver(capabilities);
                 driver.navigate().to(url);
-                break;
+                return driver;
             } catch (Exception e) {
                 // String to be scanned to find the pattern.
                 String line = e.getMessage();
@@ -639,28 +601,25 @@ public class StartAccount extends Thread {
     public void run() {
         while (true) {
             try {
-                String countrycode = "";
-                String Pnumber = "";
-                String Countryname[] = null;
 
                 Timer t = new Timer();
 
-                t.scheduleAtFixedRate(
-                        new TimerTask() {
-                    public void run() {
-
-                        keepchecking();
-                    }
-                },
-                        0, // run first occurrence immediately
-                        1000);  // run every three seconds
+                t.scheduleAtFixedRate(new TimerTask() {public void run() {keepchecking();}},0, 1000);  // run every three seconds
 
                 try {
                     KingschAccount.StatusLBL.setText("Setting...");
 
                     KingschAccount.StatusLBL.setText("Goging to get email...");
-                    Emailwork();
-                    //Phonework(driver);
+                    if (typeRun == "phone") {
+                        Phonework(driver);
+                    } else {
+                        Emailwork();
+                    }
+
+                    driver.executeScript("window.open();");
+                    ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
+                    driver.switchTo().window(tabs2.get(1));
+
                     KingschAccount.StatusLBL.setText("Goging to get random name...");
                     driver.navigate().to("http://random-name-generator.info/");
                     getname(driver);
@@ -683,7 +642,13 @@ public class StartAccount extends Thread {
                         captchasolving(driver);
                     }
                     KingschAccount.StatusLBL.setText("Verifying Account...");
-                    verfiyaccount(driver);
+                    if (email.isEmpty()) {
+                        verfiyaccountPhone(driver);
+                    } else {
+                        verfiyaccount(driver);
+                    }
+
+
                     Thread.sleep(5000);
 
                     KingschAccount.StatusLBL.setText("Saving data into csv...");
@@ -716,7 +681,7 @@ public class StartAccount extends Thread {
                         if (url.contains("https://")) {
                             KingschAccount.StatusLBL.setText("Going to " + url);
                             driver.navigate().to(url);
-                             Thread.sleep(800);
+                            Thread.sleep(800);
                             working:
                             while (true) {
                                 try {
