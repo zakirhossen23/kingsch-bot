@@ -28,10 +28,16 @@ import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.openqa.selenium.JavascriptExecutor;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class StartAccount extends Thread {
 
@@ -50,14 +56,14 @@ public class StartAccount extends Thread {
     }
 
     public static void downloadFile(URL url, String outputFileName) throws IOException {
-        try (InputStream in = url.openStream(); ReadableByteChannel rbc = Channels.newChannel(in); FileOutputStream fos = new FileOutputStream(outputFileName)) {
+        try ( InputStream in = url.openStream();  ReadableByteChannel rbc = Channels.newChannel(in);  FileOutputStream fos = new FileOutputStream(outputFileName)) {
             fos.getChannel().transferFrom(rbc, 0, Long.MAX_VALUE);
         }
     }
 
     private static void unzip(Path source, Path target) throws IOException {
 
-        try (ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
+        try ( ZipInputStream zis = new ZipInputStream(new FileInputStream(source.toFile()))) {
 
             // list files in zip
             ZipEntry zipEntry = zis.getNextEntry();
@@ -126,7 +132,6 @@ public class StartAccount extends Thread {
         return normalizePath;
     }
 
-
     private String textTocapitalize(String message) {
         // stores each characters to a char array
         char[] charArray = message.toCharArray();
@@ -155,7 +160,8 @@ public class StartAccount extends Thread {
         message = String.valueOf(charArray);
         return message;
     }
-//------------------------------------------------------------------------------Captcha Solving------------------------------------------------------------
+
+    //------------------------------------------------------------------------------Captcha Solving------------------------------------------------------------
     private void phonecaptchasolving(ChromeDriver driver) throws InterruptedException {
         Allwork:
         while (true) {
@@ -182,7 +188,8 @@ public class StartAccount extends Thread {
             }
         }
     }
-//------------------------------------------------------------------------------Fill UP signup------------------------------------------------------------
+
+    //------------------------------------------------------------------------------Fill UP signup------------------------------------------------------------
     private void fillupforphonesignup(WebDriver driver) {
         driver.findElement(By.xpath("//*[@class='CountrySelect__wrapper']/div")).click();
 
@@ -191,7 +198,7 @@ public class StartAccount extends Thread {
             restart:
             while (true) {
                 Countryname = textTocapitalize(Countryname);
-                 driver.findElement(By.xpath("//*[contains(text(),'" + Countryname + "')]/parent::*/*[contains(text(),'"+countrycode+"')]/parent::*")).click();
+                driver.findElement(By.xpath("//*[contains(text(),'" + Countryname + "')]/parent::*/*[contains(text(),'" + countrycode + "')]/parent::*")).click();
                 //driver.findElement(By.xpath("//*[contains(text(),'" + Countryname + "')]")).click();
                 break;
             }
@@ -217,7 +224,8 @@ public class StartAccount extends Thread {
         driver.findElement(By.xpath("//*[@class='submit-btn']")).click();
 
     }
-//------------------------------------------------------------------------------Get Email/Name------------------------------------------------------------
+
+    //------------------------------------------------------------------------------Get Email/Name------------------------------------------------------------
     private void getemail(WebDriver driver) {
         while (true) {
             try {
@@ -232,10 +240,31 @@ public class StartAccount extends Thread {
         }
     }
 
+    private void getemailGmail(WebDriver driver) {
+        while (true) {
+            try {
+                ((JavascriptExecutor) driver).executeScript("document.getElementById('option-3').click()");
+                ((JavascriptExecutor) driver).executeScript("document.getElementById('generate_button').click()");
+                Thread.sleep(1500);
+                String result = driver.findElement(By.id("email_address")).getAttribute("value");
+                if (result.contains("@")) {
+                    email = result;
+                    driver.findElement(By.id("button_go")).click();
+                    driver.manage().timeouts().implicitlyWait(5, TimeUnit.SECONDS);
+                    break;
+                }
+            } catch (Exception e) {
+                System.out.println(e);
+            }
+        }
+        driver.manage().timeouts().implicitlyWait(35, TimeUnit.SECONDS);
+    }
+
     private void getname(WebDriver driver) {
         name = driver.findElement(By.xpath("(//*[@class=\"nameList\"]/li)[1]")).getText();
     }
-//---------------------------------------------------------------------------------Verify------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------Verify------------------------------------------------------------
     private void verfiyaccountPhone(WebDriver driver) {   //🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏
         ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
         driver.switchTo().window(tabs2.get(0));
@@ -299,8 +328,22 @@ public class StartAccount extends Thread {
         }
     }
 
-    private void verfiyaccount(WebDriver driver) {   //🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏🤏
-        driver.navigate().to("https://mail.tm/en/");
+    private void verfiyaccount(WebDriver driver) {
+        try {
+            if (typeRun != "gmail") {
+                verfiyaccountTEMP(driver);
+            } else {
+                verfiyaccountGMAIL(driver);
+            }
+        } catch (Exception ex) {
+
+        }
+    }
+
+    private void verfiyaccountTEMP(WebDriver driver) {
+        driver.close();
+        ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
+        driver.switchTo().window(tabs2.get(0));
 
         driver.switchTo().defaultContent();
 
@@ -360,7 +403,57 @@ public class StartAccount extends Thread {
 
         }
     }
-//---------------------------------------------------------------------------------Login------------------------------------------------------------
+
+    private void verfiyaccountGMAIL(WebDriver driver) {
+        try {
+            Thread.sleep(1500);
+            driver.close();
+            ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
+            driver.switchTo().window(tabs2.get(0));
+            Thread.sleep(1000);
+            driver.switchTo().defaultContent();
+            driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+            driver.navigate().refresh();
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+            while (true) {
+                try {
+                    String result = driver.findElement(By.xpath("//a[contains(string(),'Kings')]")).getAttribute("href");
+                    if (result.contains("https://")){
+                     driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
+                        driver.navigate().to(result);
+                }
+                    break;
+                } catch (Exception e) {
+                }
+                   ((JavascriptExecutor)driver).executeScript("document.getElementById('button_reload').click()");   
+                Thread.sleep(200);
+            }
+
+
+            driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+            while (true) {
+                driver.switchTo().frame(3);
+                try {
+                   String result =  new WebDriverWait(driver, 10).until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//*[contains(text(),'verify_email')]"))).getAttribute("href");
+                  if (result.contains("https://")) {
+                        driver.manage().timeouts().implicitlyWait(15, TimeUnit.SECONDS);
+                        driver.navigate().to(result);
+                        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+                        break;
+                    }
+                } catch (Exception e) {
+                }
+                
+            }
+            driver.switchTo().defaultContent();
+        } catch (InterruptedException ex) {
+            Logger.getLogger(StartAccount.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
+
+    }
+
+    //---------------------------------------------------------------------------------Login------------------------------------------------------------
     private void login(WebDriver driver) {
         driver.findElement(By.xpath("//*[@placeholder=\"Username, Phone Number or E-mail\"]")).sendKeys(email);
         driver.findElement(By.xpath("//*[@placeholder=\"Password\"]")).sendKeys("Q123456789");
@@ -370,7 +463,8 @@ public class StartAccount extends Thread {
         } catch (InterruptedException ex) {
         }
     }
-//-------------------------------------------------------------------------------Save data------------------------------------------------------------
+
+    //-------------------------------------------------------------------------------Save data------------------------------------------------------------
     private void savedata() {
         try {
 
@@ -385,16 +479,24 @@ public class StartAccount extends Thread {
             System.out.println(e);
         }
     }
-//---------------------------------------------------------------------------------Email------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------Email------------------------------------------------------------
     private void Emailwork() {
         try {
-            OpenAndUpdateDriver("https://mail.tm/en/");
-            getemail(driver);
+            if (typeRun != "gmail") {
+                OpenAndUpdateDriver("https://mail.tm/en/");
+                getemail(driver);
+            } else {
+                OpenAndUpdateDriver("https://www.gmailnator.com/");
+
+                getemailGmail(driver);
+            }
         } catch (Exception ex) {
 
         }
     }
-//---------------------------------------------------------------------------------Phone------------------------------------------------------------
+
+    //---------------------------------------------------------------------------------Phone------------------------------------------------------------
     private void getphone(WebDriver driver) {
         try {
             driver.findElement(By.xpath("//*[contains(text(),'another number')]/parent::*")).click();
@@ -571,7 +673,7 @@ public class StartAccount extends Thread {
                 ChromeOptions options = new ChromeOptions();
                 options.addArguments("--mute-audio");
                 KingschAccount.StatusLBL.setText("Adding extension...");
-              //  options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
+                 options.addExtensions(new File("C:\\Program Files\\Common Files\\ChromeDriver\\anticaptcha.crx"));
                 DesiredCapabilities capabilities = new DesiredCapabilities();
                 capabilities.setCapability(ChromeOptions.CAPABILITY, options);
                 KingschAccount.StatusLBL.setText("Setting...");
@@ -604,24 +706,32 @@ public class StartAccount extends Thread {
 
                 Timer t = new Timer();
 
-                t.scheduleAtFixedRate(new TimerTask() {public void run() {keepchecking();}},0, 1000);  // run every three seconds
+                t.scheduleAtFixedRate(new TimerTask() {
+                    public void run() {
+                        keepchecking();
+                    }
+                }, 0, 1000);  // run every three seconds
 
                 try {
                     KingschAccount.StatusLBL.setText("Setting...");
 
-                    KingschAccount.StatusLBL.setText("Goging to get email...");
+                    KingschAccount.StatusLBL.setText("Going to get email...");
                     if (typeRun == "phone") {
                         Phonework(driver);
                     } else {
                         Emailwork();
                     }
 
+
                     driver.executeScript("window.open();");
                     ArrayList<String> tabs2 = new ArrayList<String>(driver.getWindowHandles());
                     driver.switchTo().window(tabs2.get(1));
 
-                    KingschAccount.StatusLBL.setText("Goging to get random name...");
+                    KingschAccount.StatusLBL.setText("Going to get random name...");
+                    driver.manage().timeouts().implicitlyWait(3, TimeUnit.SECONDS);
                     driver.navigate().to("http://random-name-generator.info/");
+                    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
+
                     getname(driver);
                     KingschAccount.StatusLBL.setText("going to KingsChat signup page...");
                     if (email.isEmpty()) {
