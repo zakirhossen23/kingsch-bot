@@ -65,6 +65,7 @@ public class KingschAccount extends javax.swing.JFrame {
         Killprocess = new javax.swing.JButton();
         phoneCheck = new javax.swing.JCheckBox();
         gmailCheck = new javax.swing.JCheckBox();
+        mixCheck = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setTitle("Create Account");
@@ -144,6 +145,8 @@ public class KingschAccount extends javax.swing.JFrame {
 
         gmailCheck.setText("Gmail?");
 
+        mixCheck.setText("Mix?");
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -155,6 +158,8 @@ public class KingschAccount extends javax.swing.JFrame {
                         .addComponent(phoneCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(gmailCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(mixCheck, javax.swing.GroupLayout.PREFERRED_SIZE, 80, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 144, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(layout.createSequentialGroup()
@@ -184,7 +189,8 @@ public class KingschAccount extends javax.swing.JFrame {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(phoneCheck)
                     .addComponent(jButton3)
-                    .addComponent(gmailCheck))
+                    .addComponent(gmailCheck)
+                    .addComponent(mixCheck))
                 .addGap(6, 6, 6)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
@@ -217,10 +223,15 @@ public class KingschAccount extends javax.swing.JFrame {
         stopWork = false;
 
         StartAccount obj = new StartAccount();
-        if (phoneCheck.isSelected())
-        obj.typeRun= "phone";
-          if (gmailCheck.isSelected())
-        obj.typeRun= "gmail";
+        if (phoneCheck.isSelected()) {
+            obj.typeRun = "phone";
+        }
+        if (gmailCheck.isSelected()) {
+            obj.typeRun = "gmail";
+        }
+        if (mixCheck.isSelected()) {
+            obj.typeRun = "mix";
+        }
         obj.start();
 
         StatusLBL.setText("Started...");
@@ -312,6 +323,7 @@ public class KingschAccount extends javax.swing.JFrame {
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JCheckBox mixCheck;
     private javax.swing.JCheckBox phoneCheck;
     public static javax.swing.JTextField urlText;
     // End of variables declaration//GEN-END:variables
