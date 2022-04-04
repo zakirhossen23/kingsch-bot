@@ -9,10 +9,10 @@
     <ROW Property="ARPNOREPAIR" MultiBuildValue="DefaultBuild:1"/>
     <ROW Property="ARPPRODUCTICON" Value="Icon5.exe" Type="8"/>
     <ROW Property="Manufacturer" Value="KingChat"/>
-    <ROW Property="ProductCode" Value="1033:{54776765-31BB-4F1A-A523-F76495092225} " Type="16"/>
+    <ROW Property="ProductCode" Value="1033:{E4DE650C-9F80-4F25-BAC7-C8FC8A1ABC66} " Type="16"/>
     <ROW Property="ProductLanguage" Value="1033"/>
-    <ROW Property="ProductName" Value="KingChat 1.0.0"/>
-    <ROW Property="ProductVersion" Value="1.0.1" Type="32"/>
+    <ROW Property="ProductName" Value="KingChat"/>
+    <ROW Property="ProductVersion" Value="2.0.1" Type="32"/>
     <ROW Property="SecureCustomProperties" Value="OLDPRODUCTS;AI_NEWERPRODUCTFOUND;AI_SETUPEXEPATH;SETUPEXEDIR"/>
     <ROW Property="UpgradeCode" Value="{78F5C150-96DA-4956-A638-8A019D64508C}"/>
     <ROW Property="WindowsType9X" MultiBuildValue="DefaultBuild:Windows 9x/ME" ValueLocId="-"/>
@@ -53,6 +53,7 @@
     <ROW File="kingsch_bot.jar" Component_="kingsch_bot.jar" FileName="KINGSC~1.JAR|kingsch_bot.jar" Attributes="0" SourcePath="..\Code\dist\kingsch_bot.jar" SelfReg="false"/>
     <ROW File="AbsoluteLayout.jar" Component_="AbsoluteLayout.jar" FileName="ABSOLU~1.JAR|AbsoluteLayout.jar" Attributes="0" SourcePath="..\Code\dist\lib\AbsoluteLayout.jar" SelfReg="false"/>
     <ROW File="seleniumserverstandalone3.141.59.jar" Component_="AbsoluteLayout.jar" FileName="SELENI~1.JAR|selenium-server-standalone-3.141.59.jar" Attributes="0" SourcePath="..\Code\dist\lib\selenium-server-standalone-3.141.59.jar" SelfReg="false"/>
+    <ROW File="libphonenumber8.12.45.jar" Component_="AbsoluteLayout.jar" FileName="LIBPHO~1.JAR|libphonenumber-8.12.45.jar" Attributes="0" SourcePath="..\Code\dist\lib\libphonenumber-8.12.45.jar" SelfReg="false"/>
   </COMPONENT>
   <COMPONENT cid="caphyon.advinst.msicomp.BootstrOptComponent">
     <ROW BootstrOptKey="GlobalOptions" DownloadFolder="[AppDataFolder][|Manufacturer]\[|ProductName]\prerequisites" Options="2"/>
